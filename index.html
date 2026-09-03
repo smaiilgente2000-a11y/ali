@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تسجيل حضور التلاميذ - كاميرا + جهاز مسح</title>
+    <title>نظام تسجيل حضور التلاميذ - ثانوية علي بن ربيعة الخاصة</title>
 
-    <!-- مكتبة الباركود (JsBarcode) -->
-</head>
-<head>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-
-    <!-- مكتبة المسح بالكاميرا (html5-qrcode) - مصدر موثوق -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
     <link rel="stylesheet" href="style.css">
@@ -19,10 +14,10 @@
     <div class="container">
         <header>
             <h1>📚 نظام تسجيل حضور التلاميذ</h1>
+            <div class="school-name">🏫 ثانوية علي بن ربيعة الخاصة</div>
             <div class="date-display" id="currentDate"></div>
         </header>
 
-        <!-- التبويبات -->
         <div class="tabs no-print">
             <button class="tab-btn active" onclick="switchTab('scan')">🔍 مسح الحضور</button>
             <button class="tab-btn" onclick="switchTab('students')">👥 إدارة التلاميذ</button>
@@ -31,7 +26,6 @@
 
         <!-- تبويب مسح الحضور -->
         <div id="scan-tab" class="tab-content active">
-            <!-- إحصائيات -->
             <div class="stats-bar">
                 <div class="stat-card">
                     <div class="stat-label">إجمالي التلاميذ</div>
@@ -56,7 +50,6 @@
                     <input type="text" id="scanInput" placeholder="امسح الباركود هنا..." autofocus>
                     <p class="scan-note">ضع المؤشر هنا ثم امسح الباركود بجهاز المسح</p>
 
-                    <!-- زر الكاميرا -->
                     <button id="cameraBtn" class="btn primary" onclick="toggleCamera()">📷 مسح بالكاميرا</button>
                     <div id="cameraContainer" style="display: none; margin-top: 15px;">
                         <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
@@ -72,14 +65,13 @@
                 </div>
             </div>
 
-            <!-- قوائم الحضور والغياب -->
             <div class="lists-section">
                 <div class="attendance-list">
                     <h2>✅ الحاضرون (<span id="presentCount">0</span>)</h2>
                     <ul id="presentList"></ul>
                 </div>
                 <div class="absence-list">
-                    <h2>❌ الغائبون (<span id="absentCount">0</span>)</h2>
+                    <h2>❌ الغائبون (<span id="absentCount">0</span>) - تاريخ الغياب: <span id="absenceDate"><?php echo today; ?></span></h2>
                     <ul id="absentList"></ul>
                 </div>
             </div>
@@ -91,14 +83,21 @@
                 <h2>إدارة التلاميذ</h2>
 
                 <div class="add-student-form">
-                    <input type="text" id="studentName" placeholder="اسم التلميذ">
+                    <input type="text" id="studentName" placeholder="الاسم الكامل">
+                    <input type="tel" id="studentPhone" placeholder="رقم الهاتف">
+                    <input type="text" id="studentLevel" placeholder="المستوى (مثال: 1 ثانوي)">
                     <input type="text" id="studentCode" placeholder="الرمز التعريفي (مثال: 1001)">
                     <button onclick="addStudent()" class="btn primary">➕ إضافة</button>
                 </div>
 
                 <div class="student-list-header">
                     <h3>قائمة التلاميذ (<span id="totalStudents">0</span>)</h3>
-                    <button onclick="exportStudents()" class="btn success">📥 تصدير القائمة</button>
+                    <div class="backup-actions no-print">
+                        <button onclick="exportDataBackup()" class="btn success" style="font-size:0.9rem;">💾 تصدير نسخة احتياطية</button>
+                        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importDataBackup(this.files[0])">
+                        <button onclick="document.getElementById('importFile').click()" class="btn primary" style="font-size:0.9rem;">📂 استيراد نسخة</button>
+                        <button onclick="exportStudents()" class="btn success" style="font-size:0.9rem;">📥 تصدير القائمة</button>
+                    </div>
                 </div>
                 <ul id="allStudentsList"></ul>
             </div>
@@ -109,10 +108,11 @@
             <div class="barcode-generator">
                 <h2>توليد باركود للتلاميذ</h2>
 
-                <div class="barcode-actions">
+                <div class="barcode-actions no-print">
                     <button onclick="generateAllBarcodes()" class="btn success">📦 توليد جميع الباركودات</button>
                     <button onclick="clearBarcodes()" class="btn danger">🗑️ مسح الكل</button>
-                    <button onclick="window.print()" class="btn warning">🖨️ طباعة</button>
+                    <button onclick="printAllCards()" class="btn primary">🖨️ طباعة كل البطاقات</button>
+                    <button onclick="window.print()" class="btn warning">🖨️ طباعة الصفحة</button>
                 </div>
 
                 <div class="barcode-container" id="barcodeContainer"></div>
@@ -122,4 +122,5 @@
 
     <script src="app.js"></script>
 </body>
+</html>
 </html>
