@@ -42,8 +42,16 @@ header {
 
 h1 {
     color: var(--dark-color);
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     font-size: 2.2rem;
+}
+
+.school-name {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
 }
 
 .date-display {
@@ -371,6 +379,11 @@ h1 {
     transform: translateX(-5px);
 }
 
+.student-code {
+    color: #666;
+    font-size: 0.9rem;
+}
+
 /* ================ إدارة التلاميذ ================ */
 .student-management {
     background: var(--light-gray);
@@ -393,7 +406,7 @@ h1 {
     padding: 15px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    min-width: 200px;
+    min-width: 150px;
     font-size: 1rem;
     transition: all 0.3s;
 }
@@ -409,6 +422,14 @@ h1 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 #allStudentsList {
@@ -427,6 +448,8 @@ h1 {
     align-items: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     transition: all 0.3s;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 #allStudentsList li:hover {
@@ -435,15 +458,16 @@ h1 {
 
 .student-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .student-actions button {
-    padding: 8px 15px;
+    padding: 6px 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     transition: all 0.3s;
 }
 
@@ -454,6 +478,11 @@ h1 {
 
 .barcode-btn {
     background: var(--primary-color);
+    color: white;
+}
+
+.card-btn {
+    background: #17a2b8;
     color: white;
 }
 
@@ -520,6 +549,64 @@ h1 {
     background: #c82333;
 }
 
+/* ================ تنسيقات البطاقة للطباعة ================ */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.student-card {
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    width: 280px;
+    text-align: center;
+    background: white;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    page-break-inside: avoid;
+}
+
+.student-card .school-name-card {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
+}
+
+.student-card .student-name {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin: 10px 0 5px;
+}
+
+.student-card .student-level {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+.student-card .student-phone {
+    font-size: 1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+.student-card .student-code {
+    font-size: 0.9rem;
+    color: #999;
+    margin: 5px 0 10px;
+}
+
+.student-card svg {
+    max-width: 100%;
+    height: auto;
+}
+
 /* ================ التنسيقات المتجاوبة ================ */
 @media (max-width: 768px) {
     .container {
@@ -549,6 +636,11 @@ h1 {
     .add-student-form {
         flex-direction: column;
     }
+
+    .student-list-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
 /* ================ للطباعة ================ */
@@ -563,23 +655,12 @@ h1 {
     }
 
     .no-print {
-        display: none;
+        display: none !important;
     }
 
-    .barcode-item {
+    .student-card {
         break-inside: avoid;
         border: 1px solid #000;
+        box-shadow: none;
     }
-    /* تنسيق رقم الهاتف وتاريخ الغياب في القوائم */
-.absence-list li span {
-    direction: ltr; /* لمحاذاة الأرقام بشكل أفضل */
-}
-.absence-list li span .phone {
-    color: #555;
-    font-weight: bold;
-}
-.absence-list li span .date {
-    color: #888;
-    font-size: 0.9em;
-}
 }
