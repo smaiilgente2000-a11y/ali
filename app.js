@@ -15,27 +15,27 @@ function updateDateDisplay() {
     const todayDate = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dateElement.textContent = todayDate.toLocaleDateString('ar-MA', options);
+    // تحديث تاريخ الغياب في عنوان القائمة
+    const absenceDateSpan = document.getElementById('absenceDate');
+    if (absenceDateSpan) {
+        absenceDateSpan.textContent = today;
+    }
 }
 
 // ================ التبديل بين التبويبات ================
 function switchTab(tabName) {
-    // إذا كانت الكاميرا مفتوحة وننتقل من تبويب المسح، نغلقها
     if (tabName !== 'scan' && isCameraScanning) {
         stopCamera();
     }
 
-    // إخفاء جميع التبويبات
     const tabs = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
 
-    // إزالة التفعيل من جميع الأزرار
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
 
-    // تفعيل التبويب المحدد
     document.getElementById(tabName + '-tab').classList.add('active');
 
-    // تفعيل الزر المناسب
     const activeButton = Array.from(buttons).find(btn =>
         btn.textContent.includes(getTabTitle(tabName))
     );
@@ -43,7 +43,6 @@ function switchTab(tabName) {
         activeButton.classList.add('active');
     }
 
-    // التركيز على حقل المسح إذا كنا في تبويب المسح
     if (tabName === 'scan') {
         document.getElementById('scanInput').focus();
     }
@@ -61,18 +60,12 @@ function getTabTitle(tabName) {
 // ================ معالجة المسح من جهاز المسح الخارجي ================
 document.addEventListener('DOMContentLoaded', function() {
     const scanInput = document.getElementById('scanInput');
-
-    // التركيز التلقائي على حقل المسح
     scanInput.focus();
 
-    // معالجة الإدخال من جهاز المسح
     scanInput.addEventListener('input', function(e) {
         const code = this.value.trim();
-
-        // أجهزة المسح عادة ما تكون سريعة جداً
         if (code.length >= 3) {
             clearTimeout(scanTimeout);
-
             scanTimeout = setTimeout(() => {
                 processScan(code);
                 this.value = '';
@@ -81,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // معالجة مفتاح Enter
     scanInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -93,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // منع فقدان التركيز
     scanInput.addEventListener('blur', function() {
         setTimeout(() => {
             if (document.getElementById('scan-tab').classList.contains('active')) {
@@ -106,30 +97,24 @@ document.addEventListener('DOMContentLoaded', function() {
 // ================ معالجة المسح (عامة) ================
 function processScan(code) {
     const now = Date.now();
-
-    // منع المسح المكرر
     if (now - lastScanTime < 1000) {
         return;
     }
     lastScanTime = now;
 
-    // البحث عن التلميذ
     const student = students.find(s => s.code === code);
-
     if (!student) {
         showMessage('❌ رمز غير معروف: ' + code, 'error');
         playBeep('error');
         return;
     }
 
-    // التحقق من التسجيل المسبق
     if (attendance[today]?.includes(student.id)) {
         showMessage('⚠️ ' + student.name + ' مسجل بالفعل', 'warning');
         playBeep('warning');
         return;
     }
 
-    // تسجيل الحضور
     if (!attendance[today]) {
         attendance[today] = [];
     }
@@ -151,7 +136,6 @@ function toggleCamera() {
 }
 
 function startCamera() {
-    // التأكد من تحميل المكتبة
     if (typeof Html5Qrcode === 'undefined') {
         showMessage('❌ مكتبة المسح غير محملة. تأكد من اتصال الإنترنت.', 'error');
         return;
@@ -160,17 +144,13 @@ function startCamera() {
     const container = document.getElementById('cameraContainer');
     container.style.display = 'block';
     const readerDiv = document.getElementById('reader');
-
-    // مسح أي عناصر سابقة
     readerDiv.innerHTML = '';
 
     try {
         html5QrCode = new Html5Qrcode("reader");
-
         const config = {
             fps: 10,
             qrbox: { width: 250, height: 150 },
-            // دعم الباركود الخطي و QR
             formatsToSupport: [
                 Html5QrcodeSupportedFormats.CODE_128,
                 Html5QrcodeSupportedFormats.CODE_39,
@@ -205,16 +185,12 @@ function startCamera() {
 }
 
 function onScanSuccess(decodedText, decodedResult) {
-    // عند نجاح المسح، نوقف الكاميرا
     stopCamera();
-    // تعبئة الحقل ومعالجته
     document.getElementById('scanInput').value = decodedText;
     processScan(decodedText);
 }
 
-function onScanError(err) {
-    // أخطاء مستمرة أثناء المسح (تجاهلها)
-}
+function onScanError(err) { }
 
 function stopCamera() {
     if (html5QrCode) {
@@ -228,7 +204,6 @@ function stopCamera() {
             console.error('خطأ في إيقاف الكاميرا:', err);
         });
     } else {
-        // إذا لم تكن الكاميرا مفعلة
         document.getElementById('cameraContainer').style.display = 'none';
         document.getElementById('cameraBtn').textContent = '📷 مسح بالكاميرا';
         isCameraScanning = false;
@@ -300,7 +275,9 @@ function playBeep(type) {
 // ================ إدارة التلاميذ ================
 function addStudent() {
     const name = document.getElementById('studentName').value.trim();
+    const level = document.getElementById('studentLevel').value.trim();
     const code = document.getElementById('studentCode').value.trim();
+    const phone = document.getElementById('studentPhone').value.trim();
 
     if (!name || !code) {
         showMessage('❌ يرجى إدخال الاسم والرمز التعريفي', 'error');
@@ -315,7 +292,9 @@ function addStudent() {
     const newStudent = {
         id: Date.now(),
         name: name,
+        level: level || 'غير محدد',
         code: code,
+        phone: phone || 'غير مسجل',
         createdAt: new Date().toISOString()
     };
 
@@ -323,7 +302,9 @@ function addStudent() {
     saveData();
 
     document.getElementById('studentName').value = '';
+    document.getElementById('studentLevel').value = '';
     document.getElementById('studentCode').value = '';
+    document.getElementById('studentPhone').value = '';
 
     updateDisplay();
     showMessage('✅ تم إضافة التلميذ: ' + name, 'success');
@@ -334,14 +315,13 @@ function deleteStudent(id) {
     if (confirm('هل أنت متأكد من حذف هذا التلميذ؟')) {
         students = students.filter(s => s.id !== id);
 
-        // إزالة هذا التلميذ من كل أيام الحضور
         Object.keys(attendance).forEach(date => {
             attendance[date] = attendance[date].filter(sId => sId !== id);
         });
 
         saveData();
         updateDisplay();
-        showMessage('تم حذف التلميذ', 'warning');
+        showMessage('🗑️ تم حذف التلميذ', 'warning');
     }
 }
 
@@ -351,7 +331,7 @@ function resetTodayAttendance() {
         attendance[today] = [];
         saveData();
         updateDisplay();
-        showMessage('تم إعادة تعيين حضور اليوم', 'success');
+        showMessage('🔄 تم إعادة تعيين حضور اليوم', 'success');
     }
 }
 
@@ -359,12 +339,11 @@ function resetTodayAttendance() {
 function updateDisplay() {
     const todayAttendance = attendance[today] || [];
 
-    // تحديث الإحصائيات
     document.getElementById('totalStudentsStat').textContent = students.length;
     document.getElementById('presentStudentsStat').textContent = todayAttendance.length;
     document.getElementById('absentStudentsStat').textContent = students.length - todayAttendance.length;
 
-    // تحديث قائمة الحاضرين
+    // الحاضرون
     const presentStudents = students.filter(s => todayAttendance.includes(s.id));
     document.getElementById('presentList').innerHTML = presentStudents.map(s =>
         `<li>
@@ -374,25 +353,28 @@ function updateDisplay() {
     ).join('');
     document.getElementById('presentCount').textContent = presentStudents.length;
 
-    // تحديث قائمة الغائبين
+    // الغائبون - عرض الاسم + رقم الهاتف + تاريخ الغياب (today)
     const absentStudents = students.filter(s => !todayAttendance.includes(s.id));
     document.getElementById('absentList').innerHTML = absentStudents.map(s =>
         `<li>
-            <span>${s.name}</span>
+            <span>${s.name} - 📞 ${s.phone || 'غير مسجل'} - 📅 ${today}</span>
             <span class="student-code">${s.code}</span>
         </li>`
     ).join('');
     document.getElementById('absentCount').textContent = absentStudents.length;
 
-    // تحديث قائمة جميع التلاميذ
+    // قائمة جميع التلاميذ (مع إضافة المستوى والهاتف)
     document.getElementById('allStudentsList').innerHTML = students.map(s =>
         `<li>
             <div>
                 <strong>${s.name}</strong>
+                <span style="color:#666;margin-right:10px;">المستوى: ${s.level || 'غير محدد'}</span>
+                <span style="color:#666;margin-right:10px;">📞 ${s.phone || 'غير مسجل'}</span>
                 <span style="color:#666;margin-right:10px;">الرمز: ${s.code}</span>
             </div>
             <div class="student-actions">
                 <button class="barcode-btn" onclick="generateBarcodeForStudent('${s.code}', '${s.name}')">🏷️ باركود</button>
+                <button class="card-btn" onclick="printCard(${s.id})">🖨️ بطاقة</button>
                 <button class="delete-btn" onclick="deleteStudent(${s.id})">🗑️ حذف</button>
             </div>
         </li>`
@@ -426,7 +408,6 @@ function generateBarcodeForStudent(code, name) {
 function addBarcodeItem(name, code) {
     const container = document.getElementById('barcodeContainer');
 
-    // تجنب التكرار
     const existingBarcode = document.getElementById(`barcode-item-${code}`);
     if (existingBarcode) {
         showMessage('⚠️ هذا الباركود موجود بالفعل', 'warning');
@@ -446,7 +427,6 @@ function addBarcodeItem(name, code) {
 
     container.appendChild(item);
 
-    // توليد الباركود مع تأخير بسيط لظهور العنصر
     setTimeout(() => {
         try {
             JsBarcode(`#barcode-${code}`, code, {
@@ -479,7 +459,253 @@ function clearBarcodes() {
     }
 }
 
-// ================ التصدير ================
+// ================ طباعة البطاقات ================
+function buildCardHTML(student) {
+    return `
+        <div class="student-card">
+            <div class="school-name-card">🏫 ثانوية علي بن ربيعة الخاصة</div>
+            <div class="student-name">${student.name}</div>
+            <div class="student-level">المستوى: ${student.level || 'غير محدد'}</div>
+            <div class="student-phone">📞 ${student.phone || 'غير مسجل'}</div>
+            <div class="student-code">الرمز: ${student.code}</div>
+            <svg id="barcode-${student.id}"></svg>
+        </div>
+    `;
+}
+
+function printCard(studentId) {
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+        showMessage('❌ التلميذ غير موجود', 'error');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (!printWindow) {
+        showMessage('❌ يرجى السماح للنوافذ المنبثقة', 'error');
+        return;
+    }
+
+    const html = `
+    <!DOCTYPE html>
+    <html dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>بطاقة التلميذ - ${student.name}</title>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f0f0f0; }
+            .student-card {
+                border: 2px solid #333;
+                border-radius: 10px;
+                padding: 20px;
+                width: 280px;
+                text-align: center;
+                background: white;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            }
+            .school-name-card {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #007bff;
+                margin-bottom: 8px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 5px;
+            }
+            .student-name {
+                font-size: 1.4rem;
+                font-weight: bold;
+                margin: 10px 0 5px;
+            }
+            .student-level, .student-phone {
+                font-size: 1rem;
+                color: #555;
+                margin: 5px 0;
+            }
+            .student-code {
+                font-size: 0.9rem;
+                color: #999;
+                margin: 5px 0 10px;
+            }
+            svg {
+                max-width: 100%;
+                height: auto;
+            }
+            @media print {
+                body { background: white; }
+                .student-card { border: 1px solid #000; box-shadow: none; }
+            }
+        </style>
+    </head>
+    <body>
+        ${buildCardHTML(student)}
+        <script>
+            window.onload = function() {
+                try {
+                    JsBarcode("#barcode-${student.id}", "${student.code}", {
+                        format: "CODE128",
+                        width: 2,
+                        height: 80,
+                        displayValue: true,
+                        margin: 5
+                    });
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                } catch(e) {
+                    alert("خطأ في توليد الباركود: " + e.message);
+                }
+            };
+        <\/script>
+    </body>
+    </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
+function printAllCards() {
+    if (students.length === 0) {
+        showMessage('❌ لا يوجد تلاميذ لطباعة بطاقاتهم', 'error');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) {
+        showMessage('❌ يرجى السماح للنوافذ المنبثقة', 'error');
+        return;
+    }
+
+    const cardsHTML = students.map(s => buildCardHTML(s)).join('');
+
+    const html = `
+    <!DOCTYPE html>
+    <html dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>بطاقات جميع التلاميذ</title>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+        <style>
+            body { font-family: 'Segoe UI', Tahoma, sans-serif; background: white; padding: 20px; }
+            .card-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+            }
+            .student-card {
+                border: 2px solid #333;
+                border-radius: 10px;
+                padding: 20px;
+                width: 280px;
+                text-align: center;
+                background: white;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+                page-break-inside: avoid;
+            }
+            .school-name-card {
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #007bff;
+                margin-bottom: 8px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 5px;
+            }
+            .student-name {
+                font-size: 1.4rem;
+                font-weight: bold;
+                margin: 10px 0 5px;
+            }
+            .student-level, .student-phone {
+                font-size: 1rem;
+                color: #555;
+                margin: 5px 0;
+            }
+            .student-code {
+                font-size: 0.9rem;
+                color: #999;
+                margin: 5px 0 10px;
+            }
+            svg {
+                max-width: 100%;
+                height: auto;
+            }
+            @media print {
+                .student-card { border: 1px solid #000; box-shadow: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card-container">
+            ${cardsHTML}
+        </div>
+        <script>
+            window.onload = function() {
+                ${students.map(s => `
+                    try {
+                        JsBarcode("#barcode-${s.id}", "${s.code}", {
+                            format: "CODE128",
+                            width: 2,
+                            height: 80,
+                            displayValue: true,
+                            margin: 5
+                        });
+                    } catch(e) { console.error(e); }
+                `).join('')}
+                setTimeout(function() {
+                    window.print();
+                }, 500);
+            };
+        <\/script>
+    </body>
+    </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+}
+
+// ================ التصدير والاستيراد (النسخ الاحتياطي) ================
+function exportDataBackup() {
+    const data = {
+        students: students,
+        attendance: attendance
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance-backup-${today}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showMessage('✅ تم تصدير النسخة الاحتياطية', 'success');
+}
+
+function importDataBackup(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.students && data.attendance) {
+                students = data.students;
+                attendance = data.attendance;
+                saveData();
+                updateDisplay();
+                showMessage('✅ تم استيراد البيانات بنجاح', 'success');
+            } else {
+                showMessage('❌ ملف غير صالح', 'error');
+            }
+        } catch (err) {
+            showMessage('❌ خطأ في قراءة الملف: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    document.getElementById('importFile').value = '';
+}
+
+// ================ تصدير تقرير الحضور وقائمة التلاميذ ================
 function exportAttendance() {
     const todayAttendance = attendance[today] || [];
     const presentStudents = students.filter(s => todayAttendance.includes(s.id));
@@ -493,10 +719,9 @@ function exportAttendance() {
 
     report += '\nالغائبون (' + absentStudents.length + '):\n';
     absentStudents.forEach(s => {
-        report += '- ' + s.name + ' (' + s.code + ')\n';
+        report += '- ' + s.name + ' - ' + (s.phone || 'غير مسجل') + ' - تاريخ الغياب: ' + today + ' (' + s.code + ')\n';
     });
 
-    // تحميل التقرير
     const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -511,7 +736,7 @@ function exportAttendance() {
 function exportStudents() {
     let data = 'قائمة التلاميذ\n\n';
     students.forEach(s => {
-        data += s.name + ' - ' + s.code + '\n';
+        data += s.name + ' - ' + (s.level || 'غير محدد') + ' - ' + (s.phone || 'غير مسجل') + ' - ' + s.code + '\n';
     });
 
     const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
@@ -525,10 +750,15 @@ function exportStudents() {
     showMessage('✅ تم تصدير قائمة التلاميذ', 'success');
 }
 
-// ================ حفظ البيانات ================
+// ================ حفظ البيانات مع التحقق ================
 function saveData() {
-    localStorage.setItem('students', JSON.stringify(students));
-    localStorage.setItem('attendance', JSON.stringify(attendance));
+    try {
+        localStorage.setItem('students', JSON.stringify(students));
+        localStorage.setItem('attendance', JSON.stringify(attendance));
+    } catch (e) {
+        console.error('فشل حفظ البيانات:', e);
+        showMessage('❌ فشل حفظ البيانات في المتصفح. تأكد من المساحة المتاحة.', 'error');
+    }
 }
 
 // ================ التهيئة الأولية ================
@@ -539,7 +769,6 @@ window.addEventListener('load', function() {
     document.getElementById('scanInput').focus();
 });
 
-// تحديث التاريخ إذا تغير اليوم
 setInterval(() => {
     const newToday = new Date().toISOString().split('T')[0];
     if (newToday !== today) {
@@ -549,7 +778,6 @@ setInterval(() => {
     }
 }, 60000);
 
-// إيقاف الكاميرا عند إغلاق الصفحة
 window.addEventListener('beforeunload', function() {
     if (isCameraScanning) {
         stopCamera();
