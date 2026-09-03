@@ -570,4 +570,16 @@ h1 {
         break-inside: avoid;
         border: 1px solid #000;
     }
+    /* تنسيق رقم الهاتف وتاريخ الغياب في القوائم */
+.absence-list li span {
+    direction: ltr; /* لمحاذاة الأرقام بشكل أفضل */
+}
+.absence-list li span .phone {
+    color: #555;
+    font-weight: bold;
+}
+.absence-list li span .date {
+    color: #888;
+    font-size: 0.9em;
+}
 }
