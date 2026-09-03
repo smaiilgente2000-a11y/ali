@@ -61,7 +61,7 @@
 
                 <div class="action-buttons">
                     <button onclick="resetTodayAttendance()" class="btn warning">🔄 إعادة تعيين حضور اليوم</button>
-                    <button onclick="exportAttendance()" class="btn primary">📊 تصدير التقرير</button>
+                    <button onclick="exportAttendance()" class="btn primary">📊 تصدير تقرير الغياب</button>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@
                     <ul id="presentList"></ul>
                 </div>
                 <div class="absence-list">
-                    <h2>❌ الغائبون (<span id="absentCount">0</span>) - تاريخ الغياب: <span id="absenceDate"><?php echo today; ?></span></h2>
+                    <h2>❌ الغائبون (<span id="absentCount">0</span>) - تاريخ الغياب: <span id="absenceDate"></span></h2>
                     <ul id="absentList"></ul>
                 </div>
             </div>
@@ -122,5 +122,4 @@
 
     <script src="app.js"></script>
 </body>
-</html>
 </html>
