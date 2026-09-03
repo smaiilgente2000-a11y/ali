@@ -705,32 +705,27 @@ function importDataBackup(file) {
     document.getElementById('importFile').value = '';
 }
 
-// ================ تصدير تقرير الحضور وقائمة التلاميذ ================
+// ================ تصدير تقرير الغياب (الاسم + الهاتف + تاريخ الغياب) ================
 function exportAttendance() {
     const todayAttendance = attendance[today] || [];
-    const presentStudents = students.filter(s => todayAttendance.includes(s.id));
     const absentStudents = students.filter(s => !todayAttendance.includes(s.id));
 
-    let report = 'تقرير الحضور - ' + today + '\n\n';
-    report += 'الحاضرون (' + presentStudents.length + '):\n';
-    presentStudents.forEach(s => {
-        report += '- ' + s.name + ' (' + s.code + ')\n';
-    });
-
-    report += '\nالغائبون (' + absentStudents.length + '):\n';
+    let report = 'تقرير الغياب - ' + today + '\n';
+    report += '='.repeat(40) + '\n\n';
+    report += 'الغائبون (' + absentStudents.length + '):\n';
     absentStudents.forEach(s => {
-        report += '- ' + s.name + ' - ' + (s.phone || 'غير مسجل') + ' - تاريخ الغياب: ' + today + ' (' + s.code + ')\n';
+        report += '- ' + s.name + ' - ' + (s.phone || 'غير مسجل') + ' - تاريخ الغياب: ' + today + '\n';
     });
 
     const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'attendance-report-' + today + '.txt';
+    a.download = 'absence-report-' + today + '.txt';
     a.click();
     URL.revokeObjectURL(url);
 
-    showMessage('✅ تم تصدير التقرير', 'success');
+    showMessage('✅ تم تصدير تقرير الغياب', 'success');
 }
 
 function exportStudents() {
